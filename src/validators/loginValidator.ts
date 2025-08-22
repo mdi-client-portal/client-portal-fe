@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-const loginValidator = z.object({
-  username: z.string().min(3, { message: "Username minimal 3 karakter" }),
-  password: z.string(),
+export const loginValidatorSchema = z.object({
+  email: z.email({ pattern: z.regexes.unicodeEmail }),
+  password: z.string().min(8, { message: "password atleast 8 character" }),
 });
 
-export default loginValidator;
+export type LoginValidator = z.infer<typeof loginValidatorSchema>;
