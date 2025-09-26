@@ -1,5 +1,16 @@
 import Image from "next/image";
+import { auth } from "@/auth";
+import SignOutButton from "@/components/common/buttons/signout";
+// import { signOut } from "next-auth/react";
 
-export default function Home() {
-  return <div>hello</div>;
+export default async function Home() {
+  const session = await auth();
+  console.log(session);
+
+  return (
+    <>
+      <div>hello {session?.user.email}</div>
+      <SignOutButton />
+    </>
+  );
 }

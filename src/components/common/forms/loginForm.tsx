@@ -1,5 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
+import { signIn } from "next-auth/react";
 
 import {
   Form,
@@ -17,7 +18,6 @@ import {
 } from "@/validators/loginValidator";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -30,8 +30,13 @@ export default function LoginForm() {
     },
   });
 
-  function onSubmit(values: LoginValidator) {
-    console.log(values);
+  async function onSubmit(values: LoginValidator) {
+    return await signIn("credentials", {
+      email: values.email,
+      password: values.password,
+      callbackUrl: "/",
+      redirect: false,
+    });
   }
 
   return (
