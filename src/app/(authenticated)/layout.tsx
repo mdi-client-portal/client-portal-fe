@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  SidebarProvider,
-  SidebarInset,
-  SidebarRail,
-} from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Header } from "@/components/layouts/header";
 import { Sidebar } from "@/components/layouts/sidenav";
 import { cn } from "@/lib/utils";
@@ -17,8 +13,6 @@ export default function AuthenticatedLayout({
   return (
     <SidebarProvider defaultOpen={true}>
       <Sidebar />
-
-      <SidebarRail />
 
       <SidebarInset className={cn("p-3 md:p-4")}>
         <div

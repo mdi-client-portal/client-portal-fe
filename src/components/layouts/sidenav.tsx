@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -24,7 +24,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Home, Users, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { auth } from "@/auth";
+import SignOutButton from "@/components/common/buttons/signout";
 
 type NavItem = {
   label: string;
@@ -104,33 +104,49 @@ function MainNav() {
 
 function ProfileSection() {
   const { state } = useSidebar();
+  const { data: session, status } = useSession();
+
+  if (status === "loading") {
+    return (
+      <div className="rounded-2xl bg-card p-3 shadow-sm">
+        <div className="flex items-center gap-3">
+          <Avatar className="size-9">
+            <AvatarFallback>...</AvatarFallback>
+          </Avatar>
+          {state === "expanded" && (
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium">Loading...</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-2xl bg-card p-3 shadow-sm">
       <div className="flex items-center gap-3">
         <Avatar className="size-9">
           <AvatarImage src="/placeholder-user.jpg" alt="User avatar" />
-          <AvatarFallback>AC</AvatarFallback>
+          <AvatarFallback>
+            {session?.user?.name
+              ? session.user.name.charAt(0).toUpperCase()
+              : "U"}
+          </AvatarFallback>
         </Avatar>
-        {state === "expanded" && (
+        {state === "expanded" && session?.user && (
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium">Alex Carter</p>
+            <p className="truncate text-sm font-medium">
+              {session.user.name || "User"}
+            </p>
             <p className="truncate text-xs text-muted-foreground">
-              alex@acme.com
+              {session.user.email}
             </p>
           </div>
         )}
       </div>
       <div className="mt-3">
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full justify-center rounded-xl border border-border hover:bg-muted bg-transparent"
-          aria-label="Log out"
-        >
-          <LogOut className="mr-2 size-4" />
-          {state === "expanded" && <span>Logout</span>}
-        </Button>
+        <SignOutButton />
       </div>
     </div>
   );
@@ -145,7 +161,6 @@ export function Sidebar({ children }: { children?: React.ReactNode }) {
 
       <SidebarContent className="px-2">
         <MainNav />
-        <SidebarSeparator />
       </SidebarContent>
 
       <SidebarFooter className="p-3">
