@@ -5,36 +5,42 @@ import axios from "axios";
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
-      // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-      // e.g. domain, username, password, 2FA token, etc.
       credentials: {
         email: {},
         password: {},
       },
       authorize: async (credentials) => {
-        console.log("credentials", credentials.email, credentials.password);
+        console.log(
+          "credentials authorize",
+          credentials.email,
+          credentials.password
+        );
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Email or password missing");
         }
 
         try {
           const response = await axios.post(
-            "http://127.0.0.1:5000/api/user/login",
+            "http://127.0.0.1:8080/api/clients/login",
             {
               email: credentials.email,
               password: credentials.password,
             }
           );
 
-          let user = response.data.data;
+          let data = response.data.data;
 
-          console.log(user);
+          const user = {
+            id: data.client_id,
+            name: data.client_name,
+            email: data.client_email,
+          };
+
           if (!user) {
             console.log("masuk sini bro 2");
             throw new Error("Invalid credentials.");
           }
 
-          // return JSON object with the user data
           return user;
         } catch (error) {
           console.log("error wak");
@@ -44,6 +50,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   pages: {
-    signIn: "/login", 
+    signIn: "/login",
   },
 });
