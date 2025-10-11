@@ -15,19 +15,7 @@ import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { fetcherWithAuth } from "@/lib/fetcher";
 
-// Type untuk response dari API
-interface Payment {
-  paymentID: string;
-  paymentDate: string;
-  paymentAmount: number;
-  proofOfTransfer: string;
-}
-
-interface PaymentResponse {
-  data: Payment[];
-  message: string;
-  status: string;
-}
+import type { PaymentResponse, Payment } from "@/response/paymentResponse";
 
 // Helper: format tanggal
 function formatDate(dateString: string) {
@@ -110,19 +98,19 @@ export default function PaymentsPage() {
           </TableHeader>
           <TableBody>
             {data?.data && data.data.length > 0 ? (
-              data.data.map((payment) => (
+              data.data.map((payment, index) => (
                 <TableRow
-                  key={payment.paymentID}
+                  key={index}
                   className="hover:bg-muted/30 transition-colors"
                 >
                   <TableCell className="font-medium">
-                    {formatDate(payment.paymentDate)}
+                    {formatDate(payment.payment_date)}
                   </TableCell>
                   <TableCell className="text-right font-semibold">
-                    {formatCurrency(payment.paymentAmount)}
+                    {formatCurrency(payment.amount_paid)}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {payment.proofOfTransfer}
+                    {payment.proof_of_transfer}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button

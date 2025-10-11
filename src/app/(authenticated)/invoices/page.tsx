@@ -128,35 +128,36 @@ export default function InvoicesPage() {
           </TableHeader>
           <TableBody>
             {data?.data && data.data.length > 0 ? (
-              data.data.map((invoice) => (
+              data.data.map((invoice, index) => (
                 <TableRow
-                  key={invoice.InvoiceID}
+                  key={index}
                   className="transition-colors hover:bg-muted/30"
                 >
                   <TableCell className="font-medium">
-                    {formatDate(invoice.IssueDate)}
+                    {formatDate(invoice.issue_date)}
                   </TableCell>
-                  <TableCell>{formatDate(invoice.DueDate)}</TableCell>
+                  <TableCell>{formatDate(invoice.due_date)}</TableCell>
                   <TableCell className="text-right font-medium">
-                    {formatCurrency(invoice.Total)}
+                    {formatCurrency(invoice.total)}
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={getStatusBadgeVariant(invoice.PaymentStatus)}
+                      variant={getStatusBadgeVariant(invoice.payment_status)}
                       className={
-                        invoice.PaymentStatus.toLowerCase() === "paid"
+                        invoice.payment_status.toLowerCase() === "paid"
                           ? "bg-green-500 text-white hover:bg-green-600"
-                          : invoice.PaymentStatus.toLowerCase() === "pending" ||
-                            invoice.PaymentStatus.toLowerCase() === "partial"
+                          : invoice.payment_status.toLowerCase() ===
+                              "pending" ||
+                            invoice.payment_status.toLowerCase() === "partial"
                           ? "bg-yellow-500 text-white hover:bg-yellow-600"
                           : ""
                       }
                     >
-                      {invoice.PaymentStatus}
+                      {invoice.payment_status}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatCurrency(invoice.AmountPaid)}
+                    {formatCurrency(invoice.amount_paid)}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
@@ -164,7 +165,7 @@ export default function InvoicesPage() {
                       size="sm"
                       className="bg-primary text-primary-foreground hover:bg-primary/90"
                     >
-                      <Link href={`/invoices/${invoice.InvoiceID}`}>View</Link>
+                      <Link href={`/invoices/${invoice.invoice_id}`}>View</Link>
                     </Button>
                   </TableCell>
                 </TableRow>
