@@ -50,7 +50,6 @@ function formatDate(dateString: string) {
 export default function InvoicesPage() {
   const { data: session } = useSession();
 
-  // Gunakan JWT token yang sudah di-generate saat login
   const jwtToken = session?.user?.token || null;
   console.log("Using JWT Token from session:", jwtToken);
   const { data, error, isLoading, mutate } = useSWR<InvoiceResponse>(
