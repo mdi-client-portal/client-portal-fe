@@ -13,7 +13,6 @@ export default function AuthenticatedLayout({
   return (
     <SidebarProvider defaultOpen={true}>
       <Sidebar />
-
       <SidebarInset className={cn("p-3 md:p-4")}>
         <div
           className="mb-3 h-2 w-full rounded-2xl bg-primary"

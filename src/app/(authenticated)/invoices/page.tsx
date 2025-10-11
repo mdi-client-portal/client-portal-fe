@@ -15,7 +15,6 @@ import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { fetcherWithAuth } from "@/lib/fetcher";
 import type { InvoiceResponse } from "@/response/invoiceResponse";
-import { CardContent } from "@/components/ui/card";
 
 function getStatusBadgeVariant(status: string) {
   switch (status.toLowerCase()) {
@@ -52,8 +51,9 @@ export default function InvoicesPage() {
 
   const jwtToken = session?.user?.token || null;
   console.log("Using JWT Token from session:", jwtToken);
+  console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
   const { data, error, isLoading, mutate } = useSWR<InvoiceResponse>(
-    jwtToken ? "http://localhost:8080/api/invoices/get" : null,
+    jwtToken ? `${process.env.NEXT_PUBLIC_API_URL}/api/invoices/get` : null,
     (url: string) =>
       fetcherWithAuth<InvoiceResponse>(url, jwtToken || undefined),
     {
