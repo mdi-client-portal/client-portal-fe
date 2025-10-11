@@ -7,10 +7,5 @@ export default async function Home() {
   const session = await auth();
   console.log(session);
 
-  return (
-    <>
-      <div>hello {session?.user.email}</div>
-      <SignOutButton />
-    </>
-  );
+  return <>ini Dashboard</>;
 }

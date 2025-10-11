@@ -17,12 +17,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Home, Users, Settings, LogOut } from "lucide-react";
+import { Home, ScrollText, CreditCard } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import SignOutButton from "@/components/common/buttons/signout";
 
@@ -34,8 +33,8 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { label: "Dashboard", href: "/", icon: Home },
-  { label: "invoices", href: "/invoices", icon: Users },
-  { label: "payments", href: "/payments", icon: Settings },
+  { label: "invoices", href: "/invoices", icon: ScrollText },
+  { label: "payments", href: "/payments", icon: CreditCard },
 ];
 
 function Logo() {
