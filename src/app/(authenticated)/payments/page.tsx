@@ -90,6 +90,9 @@ export default function PaymentsPage() {
               <TableHead className="font-semibold text-foreground text-right">
                 Proof of Transfer
               </TableHead>
+              <TableHead className="font-semibold text-foreground text-right">
+                Payment Status
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -147,6 +150,13 @@ export default function PaymentsPage() {
                     >
                       See Details
                     </button>
+                  </TableCell>
+                  <TableCell className="text-right font-semibold">
+                    {payment.voided_at ? (
+                      <span className="text-red-600">Voided</span>
+                    ) : (
+                      <span className="text-green-600">Active</span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
