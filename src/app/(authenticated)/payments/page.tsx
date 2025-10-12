@@ -10,7 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
-import { Eye } from "lucide-react";
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { fetcherWithAuth } from "@/lib/fetcher";
@@ -88,11 +87,8 @@ export default function PaymentsPage() {
               <TableHead className="font-semibold text-foreground text-right">
                 Payment Amount
               </TableHead>
-              <TableHead className="font-semibold text-foreground">
-                Proof of Transfer
-              </TableHead>
               <TableHead className="font-semibold text-foreground text-right">
-                Action
+                Proof of Transfer
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -109,18 +105,48 @@ export default function PaymentsPage() {
                   <TableCell className="text-right font-semibold">
                     {formatCurrency(payment.amount_paid)}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {payment.proof_of_transfer}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-primary hover:text-primary hover:bg-primary/10"
+                  <TableCell className="text-muted-foreground text-right">
+                    <button
+                      onClick={() => {
+                        const proof = payment.proof_of_transfer;
+                        if (!proof) {
+                          alert("No proof of transfer available");
+                          return;
+                        }
+
+                        try {
+                          // Ambil data base64 dari string
+                          const base64Data = proof.split(",")[1];
+                          const contentType = proof
+                            .split(",")[0]
+                            .split(":")[1]
+                            .split(";")[0];
+
+                          // Decode base64 ke Blob
+                          const byteCharacters = atob(base64Data);
+                          const byteNumbers = new Array(byteCharacters.length);
+                          for (let i = 0; i < byteCharacters.length; i++) {
+                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                          }
+                          const byteArray = new Uint8Array(byteNumbers);
+                          const blob = new Blob([byteArray], {
+                            type: contentType,
+                          });
+
+                          // Buat object URL dan buka di tab baru
+                          const blobUrl = URL.createObjectURL(blob);
+                          window.open(blobUrl, "_blank");
+
+                          // Hapus URL setelah beberapa detik untuk hemat memori
+                          setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+                        } catch (err) {
+                          console.error("Error opening image:", err);
+                        }
+                      }}
+                      className="text-blue-600 hover:underline"
                     >
-                      <Eye className="mr-2 h-4 w-4" />
-                      Detail
-                    </Button>
+                      See Details
+                    </button>
                   </TableCell>
                 </TableRow>
               ))
