@@ -11,11 +11,6 @@ import {
 import type { InvoiceWithDetailResponse } from "@/response/invoiceDetailResponse";
 import { LogOut } from "lucide-react";
 
-// PENTING: Ini adalah React component KHUSUS untuk @react-pdf/renderer
-// Bukan React biasa! Tidak bisa pakai div, span, dll
-// Hanya bisa pakai: Document, Page, View, Text, Image, Link
-
-// Define styles menggunakan StyleSheet (mirip React Native)
 const styles = StyleSheet.create({
   page: {
     padding: 30,
