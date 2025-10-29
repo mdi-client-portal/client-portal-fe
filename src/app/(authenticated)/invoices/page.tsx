@@ -64,6 +64,46 @@ export default function InvoicesPage() {
 
   console.log("Fetched invoices data:", data);
 
+  // Function to generate PDF for specific invoice
+  const handleGeneratePDF = async (invoiceId: string) => {
+    try {
+      console.log("Generating PDF for invoice:", invoiceId);
+
+      // Call API to generate PDF with invoice data
+      const response = await fetch("/api/generate-pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          invoice_id: invoiceId,
+          jwt_token: jwtToken,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate PDF");
+      }
+
+      // Get the PDF blob and download it
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = `invoice-${invoiceId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      console.log("PDF generated and downloaded successfully");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Failed to generate PDF. Please try again.");
+    }
+  };
+
   if (isLoading)
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -161,11 +201,11 @@ export default function InvoicesPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
-                      asChild
                       size="sm"
                       className="bg-primary text-primary-foreground hover:bg-primary/90"
+                      onClick={() => handleGeneratePDF(invoice.invoice_id)}
                     >
-                      <Link href={`/invoices/${invoice.invoice_id}`}>View</Link>
+                      View PDF
                     </Button>
                   </TableCell>
                 </TableRow>

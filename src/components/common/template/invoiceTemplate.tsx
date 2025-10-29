@@ -5,8 +5,11 @@ import {
   Text,
   View,
   StyleSheet,
+  Image,
   Font,
 } from "@react-pdf/renderer";
+import type { InvoiceWithDetailResponse } from "@/response/invoiceDetailResponse";
+import { LogOut } from "lucide-react";
 
 // PENTING: Ini adalah React component KHUSUS untuk @react-pdf/renderer
 // Bukan React biasa! Tidak bisa pakai div, span, dll
@@ -25,47 +28,149 @@ const styles = StyleSheet.create({
     borderBottom: "2 solid #000",
     paddingBottom: 10,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#666",
-  },
-  section: {
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  row: {
+  companyHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  companyInfo: {
+    flex: 1,
+  },
+  companyName: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#2563eb",
+    marginBottom: 5,
+  },
+  companyAddress: {
+    fontSize: 10,
+    color: "#666",
+    lineHeight: 1.4,
+  },
+  logoPlaceholder: {
+    width: 80,
+    height: 80,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoText: {
+    fontSize: 8,
+    color: "#666",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+    color: "#1f2937",
+  },
+  invoiceInfo: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  invoiceInfoSection: {
+    width: "48%",
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
     marginBottom: 8,
+    color: "#374151",
+  },
+  infoRow: {
+    flexDirection: "row",
+    marginBottom: 4,
   },
   label: {
+    fontSize: 10,
     fontWeight: "bold",
     width: "40%",
+    color: "#6b7280",
   },
   value: {
+    fontSize: 10,
     width: "60%",
-    textAlign: "right",
+    color: "#111827",
+  },
+  logo: {
+    width: 60,
+    height: 60,
   },
   table: {
     marginTop: 20,
+    borderTop: "1 solid #e5e7eb",
+  },
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#f9fafb",
+    borderBottom: "1 solid #e5e7eb",
+    paddingVertical: 8,
   },
   tableRow: {
     flexDirection: "row",
-    borderBottom: "1 solid #eee",
-    paddingVertical: 8,
+    borderBottom: "1 solid #f3f4f6",
+    paddingVertical: 6,
   },
-  tableHeader: {
-    backgroundColor: "#f5f5f5",
+  tableCol1: { width: "40%", paddingHorizontal: 8 },
+  tableCol2: { width: "15%", paddingHorizontal: 8, textAlign: "center" },
+  tableCol3: { width: "20%", paddingHorizontal: 8, textAlign: "right" },
+  tableCol4: { width: "25%", paddingHorizontal: 8, textAlign: "right" },
+  tableHeaderText: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#374151",
+  },
+  tableCellText: {
+    fontSize: 9,
+    color: "#111827",
+  },
+  totalsSection: {
+    marginTop: 20,
+    alignItems: "flex-end",
+  },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginBottom: 4,
+    width: "50%",
+  },
+  totalLabel: {
+    fontSize: 10,
+    width: "60%",
+    textAlign: "right",
+    paddingRight: 10,
+  },
+  totalValue: {
+    fontSize: 10,
+    width: "40%",
+    textAlign: "right",
     fontWeight: "bold",
   },
-  tableCol: {
-    width: "25%",
-    paddingHorizontal: 5,
+  grandTotalRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 8,
+    paddingTop: 8,
+    borderTop: "1 solid #374151",
+    width: "50%",
+  },
+  grandTotalLabel: {
+    fontSize: 12,
+    width: "60%",
+    textAlign: "right",
+    paddingRight: 10,
+    fontWeight: "bold",
+    color: "#1f2937",
+  },
+  grandTotalValue: {
+    fontSize: 12,
+    width: "40%",
+    textAlign: "right",
+    fontWeight: "bold",
+    color: "#1f2937",
   },
   footer: {
     position: "absolute",
@@ -73,88 +178,176 @@ const styles = StyleSheet.create({
     left: 30,
     right: 30,
     textAlign: "center",
-    fontSize: 10,
-    color: "#999",
-    borderTop: "1 solid #eee",
+    fontSize: 8,
+    color: "#9ca3af",
+    borderTop: "1 solid #e5e7eb",
     paddingTop: 10,
   },
 });
 
 interface PDFTemplateProps {
-  title: string;
-  date: string;
-  // Tambahkan props sesuai kebutuhan
+  invoiceData: InvoiceWithDetailResponse;
 }
 
-export default function PDFTemplate({ title, date }: PDFTemplateProps) {
+const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+  }).format(amount);
+};
+
+// Helper function untuk format date
+const formatDate = (dateString: string): string => {
+  return new Date(dateString).toLocaleDateString("id-ID", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+export default function PDFTemplate({ invoiceData }: PDFTemplateProps) {
+  const { invoice, invoice_details } = invoiceData;
+
   return (
     <Document>
-      {/* Page = 1 halaman PDF, size A4 */}
       <Page size="A4" style={styles.page}>
-        {/* Header Section */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.subtitle}>
-            Generated on: {new Date(date).toLocaleDateString("id-ID")}
-          </Text>
-        </View>
-
-        {/* Content Section */}
-        <View style={styles.section}>
-          <View style={styles.row}>
-            <Text style={styles.label}>Customer Name:</Text>
-            <Text style={styles.value}>John Doe</Text>
+        <View style={styles.companyHeader}>
+          <View style={styles.companyInfo}>
+            <Text style={styles.companyName}>Mobile Data Indonesia</Text>
+            <Text style={styles.companyAddress}>
+              Ruko De Mansion Blok CD no. 6{"\n"}
+              Kunciran, Pinang, Tangerang City, Banten{"\n"}
+              Telp: +62 8131783862{"\n"}
+              Email: info@mobiledata.co.id
+            </Text>
           </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Address:</Text>
-            <Text style={styles.value}>Jl. Sudirman No. 123, Jakarta</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Phone:</Text>
-            <Text style={styles.value}>+62 812-3456-7890</Text>
+          <View style={styles.logoPlaceholder}>
+            <Image
+              src="http://localhost:3000/logo-default.png"
+              style={styles.logo}
+            />
           </View>
         </View>
 
-        {/* Table Section */}
+        {/* Invoice Title */}
+        <Text style={styles.title}>INVOICE</Text>
+
+        {/* Invoice Information */}
+        <View style={styles.invoiceInfo}>
+          <View style={styles.invoiceInfoSection}>
+            <Text style={styles.sectionTitle}>Invoice Details</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Invoice Number:</Text>
+              <Text style={styles.value}>{invoice.invoice_number}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Issue Date:</Text>
+              <Text style={styles.value}>{formatDate(invoice.issue_date)}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Due Date:</Text>
+              <Text style={styles.value}>{formatDate(invoice.due_date)}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Status:</Text>
+              <Text style={styles.value}>
+                {invoice.payment_status.toUpperCase()}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.invoiceInfoSection}>
+            <Text style={styles.sectionTitle}>Payment Information</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Tax Invoice No:</Text>
+              <Text style={styles.value}>
+                {invoice.tax_invoice_number || "-"}
+              </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Tax Rate:</Text>
+              <Text style={styles.value}>{invoice.tax_rate}%</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Amount Paid:</Text>
+              <Text style={styles.value}>
+                {formatCurrency(invoice.amount_paid)}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Invoice Details Table */}
         <View style={styles.table}>
           {/* Table Header */}
-          <View style={[styles.tableRow, styles.tableHeader]}>
-            <Text style={styles.tableCol}>Item</Text>
-            <Text style={styles.tableCol}>Qty</Text>
-            <Text style={styles.tableCol}>Price</Text>
-            <Text style={styles.tableCol}>Total</Text>
+          <View style={styles.tableHeader}>
+            <View style={styles.tableCol1}>
+              <Text style={styles.tableHeaderText}>Description</Text>
+            </View>
+            <View style={styles.tableCol2}>
+              <Text style={styles.tableHeaderText}>Delivery Count</Text>
+            </View>
+            <View style={styles.tableCol3}>
+              <Text style={styles.tableHeaderText}>Price/Delivery</Text>
+            </View>
+            <View style={styles.tableCol4}>
+              <Text style={styles.tableHeaderText}>Amount</Text>
+            </View>
           </View>
 
-          {/* Table Rows */}
-          <View style={styles.tableRow}>
-            <Text style={styles.tableCol}>Product A</Text>
-            <Text style={styles.tableCol}>2</Text>
-            <Text style={styles.tableCol}>Rp 100,000</Text>
-            <Text style={styles.tableCol}>Rp 200,000</Text>
+          {invoice_details.map((detail, index) => (
+            <View key={index} style={styles.tableRow}>
+              <View style={styles.tableCol1}>
+                <Text style={styles.tableCellText}>
+                  {detail.transaction_note || `Service Item ${index + 1}`}
+                </Text>
+              </View>
+              <View style={styles.tableCol2}>
+                <Text style={styles.tableCellText}>
+                  {detail.delivery_count}
+                </Text>
+              </View>
+              <View style={styles.tableCol3}>
+                <Text style={styles.tableCellText}>
+                  {formatCurrency(detail.price_per_delivery)}
+                </Text>
+              </View>
+              <View style={styles.tableCol4}>
+                <Text style={styles.tableCellText}>
+                  {formatCurrency(detail.amount)}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Totals Section */}
+        <View style={styles.totalsSection}>
+          <View style={styles.totalRow}>
+            <Text style={styles.totalLabel}>Subtotal:</Text>
+            <Text style={styles.totalValue}>
+              {formatCurrency(invoice.sub_total)}
+            </Text>
           </View>
-          <View style={styles.tableRow}>
-            <Text style={styles.tableCol}>Product B</Text>
-            <Text style={styles.tableCol}>1</Text>
-            <Text style={styles.tableCol}>Rp 150,000</Text>
-            <Text style={styles.tableCol}>Rp 150,000</Text>
+          <View style={styles.totalRow}>
+            <Text style={styles.totalLabel}>Tax ({invoice.tax_rate}%):</Text>
+            <Text style={styles.totalValue}>
+              {formatCurrency(invoice.tax_amount)}
+            </Text>
+          </View>
+          <View style={styles.grandTotalRow}>
+            <Text style={styles.grandTotalLabel}>Total:</Text>
+            <Text style={styles.grandTotalValue}>
+              {formatCurrency(invoice.total)}
+            </Text>
           </View>
         </View>
 
-        {/* Footer */}
         <View style={styles.footer}>
           <Text>Thank you for your business!</Text>
-          <Text>www.yourcompany.com | contact@yourcompany.com</Text>
+          <Text>Mobile Data Indonesia - Your Trusted Technology Partner</Text>
         </View>
       </Page>
     </Document>
   );
 }
-
-// TECHNICAL NOTE:
-// - Document: Root component, wajib ada
-// - Page: Satu halaman PDF, bisa multiple pages
-// - View: Container seperti div (flex container by default)
-// - Text: Untuk render text, WAJIB wrap text dengan ini
-// - StyleSheet: Untuk define styles, mirip inline styles tapi lebih optimal
-// - Flexbox: Default layout engine, support flexDirection, justifyContent, dll
-// - Size A4: 595 x 842 points (8.27 x 11.69 inches)
