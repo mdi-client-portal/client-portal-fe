@@ -14,7 +14,8 @@ import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { fetcherWithAuth } from "@/lib/fetcher";
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 import type { PaymentResponse, Payment } from "@/response/paymentResponse";
 
@@ -48,6 +49,8 @@ export default function PaymentsPage() {
   const jwtToken = session?.user?.token || null;
   const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   // Fetch data dari API payments/get
   const { data, error, isLoading } = useSWR<PaymentResponse>(
@@ -72,11 +75,27 @@ export default function PaymentsPage() {
 
   // Function to sort data
   const getSortedData = () => {
-    if (!data?.data || sortColumn === null) {
-      return data?.data || [];
+    if (!data?.data) {
+      return [];
     }
 
-    const sortedData = [...data.data].sort((a, b) => {
+    // Apply filters first
+    let filteredData = data.data.filter((payment) => {
+      const matchesSearch = payment.invoice_number
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesStatus =
+        !statusFilter ||
+        (statusFilter === "active" ? !payment.voided_at : payment.voided_at);
+      return matchesSearch && matchesStatus;
+    });
+
+    // Then sort
+    if (sortColumn === null) {
+      return filteredData;
+    }
+
+    const sortedData = [...filteredData].sort((a, b) => {
       let aVal: any = a[sortColumn as keyof typeof a];
       let bVal: any = b[sortColumn as keyof typeof b];
 
@@ -137,6 +156,86 @@ export default function PaymentsPage() {
         <p className="mt-2 text-muted-foreground">
           View and manage all payment records
         </p>
+      </div>
+
+      {/* Filter Section */}
+      <div className="mb-6 space-y-4 rounded-lg border bg-card p-4">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="text-sm font-medium text-foreground">
+              Search Invoice Number
+            </label>
+            <Input
+              type="text"
+              placeholder="Search by invoice number..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-foreground">
+              Payment Status
+            </label>
+            <div className="mt-1 flex flex-wrap gap-2">
+              <button
+                onClick={() => setStatusFilter(null)}
+                className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                  statusFilter === null
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:bg-muted/80"
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setStatusFilter("active")}
+                className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                  statusFilter === "active"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:bg-muted/80"
+                }`}
+              >
+                Active
+              </button>
+              <button
+                onClick={() => setStatusFilter("voided")}
+                className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                  statusFilter === "voided"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:bg-muted/80"
+                }`}
+              >
+                Voided
+              </button>
+            </div>
+          </div>
+        </div>
+        {(searchTerm || statusFilter) && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              Active filters:
+            </span>
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="flex items-center gap-1 rounded-md bg-blue-100 px-2 py-1 text-xs text-blue-700 hover:bg-blue-200"
+              >
+                Invoice: {searchTerm}
+                <X className="h-3 w-3" />
+              </button>
+            )}
+            {statusFilter && (
+              <button
+                onClick={() => setStatusFilter(null)}
+                className="flex items-center gap-1 rounded-md bg-blue-100 px-2 py-1 text-xs text-blue-700 hover:bg-blue-200"
+              >
+                Status: {statusFilter}
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <Card>
@@ -245,7 +344,7 @@ export default function PaymentsPage() {
                   </TableCell>
                   <TableCell className="text-right font-semibold">
                     {payment.voided_at ? (
-                      <span className="text-red-600">Voided</span>
+                      <span className="text-red-600">Void</span>
                     ) : (
                       <span className="text-green-600">Active</span>
                     )}

@@ -15,7 +15,8 @@ import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { fetcherWithAuth } from "@/lib/fetcher";
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import type { InvoiceResponse } from "@/response/invoiceResponse";
 
 function getStatusBadgeVariant(status: string) {
@@ -74,6 +75,12 @@ export default function InvoicesPage() {
   const { data: session } = useSession();
   const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState<string | null>(
+    null
+  );
+  const [overdueFilter, setOverdueFilter] = useState<string | null>(null);
+  const [voidedFilter, setVoidedFilter] = useState<string | null>(null);
 
   const jwtToken = session?.user?.token || null;
   console.log("Using JWT Token from session:", jwtToken);
@@ -102,11 +109,48 @@ export default function InvoicesPage() {
 
   // Function to sort data
   const getSortedData = () => {
-    if (!data?.data || sortColumn === null) {
-      return data?.data || [];
+    if (!data?.data) {
+      return [];
     }
 
-    const sortedData = [...data.data].sort((a, b) => {
+    // Apply filters first
+    let filteredData = data.data.filter((invoice) => {
+      // Search filter
+      const matchesSearch = invoice.invoice_number
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+      // Payment status filter (paid, partial, unpaid)
+      const matchesPaymentStatus =
+        !paymentStatusFilter ||
+        (paymentStatusFilter === "unpaid"
+          ? invoice.payment_status.toLowerCase() !== "paid"
+          : invoice.payment_status.toLowerCase() ===
+            paymentStatusFilter.toLowerCase());
+
+      // Overdue filter
+      const matchesOverdue =
+        !overdueFilter ||
+        (overdueFilter === "overdue"
+          ? isOverdue(invoice.due_date)
+          : !isOverdue(invoice.due_date));
+
+      // Voided filter
+      const matchesVoided =
+        !voidedFilter ||
+        (voidedFilter === "active" ? !invoice.voided_at : invoice.voided_at);
+
+      return (
+        matchesSearch && matchesPaymentStatus && matchesOverdue && matchesVoided
+      );
+    });
+
+    // Then sort
+    if (sortColumn === null) {
+      return filteredData;
+    }
+
+    const sortedData = [...filteredData].sort((a, b) => {
       let aVal: any = a[sortColumn as keyof typeof a];
       let bVal: any = b[sortColumn as keyof typeof b];
 
@@ -218,6 +262,184 @@ export default function InvoicesPage() {
         </p>
       </div>
 
+      {/* Filter Section */}
+      <div className="mb-6 space-y-4 rounded-lg border bg-card p-4">
+        <div className="grid gap-4 md:grid-cols-3">
+          {/* Search */}
+          <div>
+            <label className="text-sm font-medium text-foreground">
+              Search Invoice Number
+            </label>
+            <Input
+              type="text"
+              placeholder="Search by invoice number..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+
+          {/* Payment Status Filter */}
+          <div>
+            <label className="text-sm font-medium text-foreground">
+              Payment Status
+            </label>
+            <div className="mt-1 flex flex-wrap gap-2">
+              <button
+                onClick={() => setPaymentStatusFilter(null)}
+                className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                  paymentStatusFilter === null
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:bg-muted/80"
+                }`}
+              >
+                All
+              </button>
+              {["paid", "partial", "unpaid"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setPaymentStatusFilter(status)}
+                  className={`px-3 py-1 rounded-md text-sm transition-colors capitalize ${
+                    paymentStatusFilter === status
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted hover:bg-muted/80"
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Overdue Filter */}
+          <div>
+            <label className="text-sm font-medium text-foreground">
+              Overdue Status
+            </label>
+            <div className="mt-1 flex flex-wrap gap-2">
+              <button
+                onClick={() => setOverdueFilter(null)}
+                className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                  overdueFilter === null
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:bg-muted/80"
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setOverdueFilter("overdue")}
+                className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                  overdueFilter === "overdue"
+                    ? "bg-red-500 text-white hover:bg-red-600"
+                    : "bg-muted hover:bg-muted/80"
+                }`}
+              >
+                Overdue
+              </button>
+              <button
+                onClick={() => setOverdueFilter("ontime")}
+                className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                  overdueFilter === "ontime"
+                    ? "bg-green-500 text-white hover:bg-green-600"
+                    : "bg-muted hover:bg-muted/80"
+                }`}
+              >
+                Belum Telat
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Voided Status Filter */}
+        <div>
+          <label className="text-sm font-medium text-foreground">
+            Voided Status
+          </label>
+          <div className="mt-1 flex flex-wrap gap-2">
+            <button
+              onClick={() => setVoidedFilter(null)}
+              className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                voidedFilter === null
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted hover:bg-muted/80"
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setVoidedFilter("active")}
+              className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                voidedFilter === "active"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted hover:bg-muted/80"
+              }`}
+            >
+              Active
+            </button>
+            <button
+              onClick={() => setVoidedFilter("voided")}
+              className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                voidedFilter === "voided"
+                  ? "bg-red-500 text-white hover:bg-red-600"
+                  : "bg-muted hover:bg-muted/80"
+              }`}
+            >
+              Voided
+            </button>
+          </div>
+        </div>
+
+        {/* Active Filters */}
+        {(searchTerm ||
+          paymentStatusFilter ||
+          overdueFilter ||
+          voidedFilter) && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              Active filters:
+            </span>
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="flex items-center gap-1 rounded-md bg-blue-100 px-2 py-1 text-xs text-blue-700 hover:bg-blue-200"
+              >
+                Invoice: {searchTerm}
+                <X className="h-3 w-3" />
+              </button>
+            )}
+            {paymentStatusFilter && (
+              <button
+                onClick={() => setPaymentStatusFilter(null)}
+                className="flex items-center gap-1 rounded-md bg-blue-100 px-2 py-1 text-xs text-blue-700 hover:bg-blue-200"
+              >
+                Payment: {paymentStatusFilter}
+                <X className="h-3 w-3" />
+              </button>
+            )}
+            {overdueFilter && (
+              <button
+                onClick={() => setOverdueFilter(null)}
+                className="flex items-center gap-1 rounded-md bg-red-100 px-2 py-1 text-xs text-red-700 hover:bg-red-200"
+              >
+                Overdue:{" "}
+                {overdueFilter === "overdue" ? "Overdue" : "Belum Telat"}
+                <X className="h-3 w-3" />
+              </button>
+            )}
+            {voidedFilter && (
+              <button
+                onClick={() => setVoidedFilter(null)}
+                className="flex items-center gap-1 rounded-md bg-blue-100 px-2 py-1 text-xs text-blue-700 hover:bg-blue-200"
+              >
+                Voided: {voidedFilter}
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
       <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
         <Table>
           <TableHeader>
@@ -281,7 +503,7 @@ export default function InvoicesPage() {
                 onClick={() => handleSort("voided_at")}
               >
                 <div className="flex items-center gap-2">
-                  Payment Status
+                  Invoice Status
                   {renderSortIcon("voided_at")}
                 </div>
               </TableHead>
@@ -336,9 +558,11 @@ export default function InvoicesPage() {
                   </TableCell>
                   <TableCell>
                     {invoice.voided_at ? (
-                      <span className="text-red-600">Voided</span>
+                      <span className="text-red-600 font-semibold">Void</span>
                     ) : (
-                      <span className="text-green-600">Active</span>
+                      <span className="text-green-600 font-semibold">
+                        Active
+                      </span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
