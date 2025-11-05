@@ -46,6 +46,10 @@ function formatDate(dateString: string) {
   });
 }
 
+function isVoided(voidedAt: string | null): boolean {
+  return voidedAt !== null;
+}
+
 export default function InvoicesPage() {
   const { data: session } = useSession();
 
@@ -147,6 +151,9 @@ export default function InvoicesPage() {
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
               <TableHead className="font-semibold text-foreground">
+                Invoice Number
+              </TableHead>
+              <TableHead className="font-semibold text-foreground">
                 Issue Date
               </TableHead>
               <TableHead className="font-semibold text-foreground">
@@ -161,6 +168,9 @@ export default function InvoicesPage() {
               <TableHead className="text-right font-semibold text-foreground">
                 Amount Paid
               </TableHead>
+              <TableHead className="font-semibold text-foreground">
+                Payment Status
+              </TableHead>
               <TableHead className="text-right font-semibold text-foreground">
                 Actions
               </TableHead>
@@ -173,6 +183,9 @@ export default function InvoicesPage() {
                   key={index}
                   className="transition-colors hover:bg-muted/30"
                 >
+                  <TableCell className="font-semibold">
+                    {invoice.invoice_number}
+                  </TableCell>
                   <TableCell className="font-medium">
                     {formatDate(invoice.issue_date)}
                   </TableCell>
@@ -199,6 +212,13 @@ export default function InvoicesPage() {
                   <TableCell className="text-right">
                     {formatCurrency(invoice.amount_paid)}
                   </TableCell>
+                  <TableCell>
+                    {invoice.voided_at ? (
+                      <span className="text-red-600">Voided</span>
+                    ) : (
+                      <span className="text-green-600">Active</span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button
                       size="sm"
@@ -212,7 +232,7 @@ export default function InvoicesPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={8} className="h-24 text-center">
                   No invoices found.
                 </TableCell>
               </TableRow>

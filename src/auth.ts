@@ -30,7 +30,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             {
               email: credentials.email,
               password: credentials.password,
-            }
+            } 
           );
 
           let data = response.data.data;
@@ -70,7 +70,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async jwt({ token, user, account }) {
-      console.log("=== JWT CALLBACK ===");
 
       if (user) {
         token.id = user.id;

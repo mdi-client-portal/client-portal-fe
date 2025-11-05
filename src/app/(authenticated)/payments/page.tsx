@@ -82,6 +82,9 @@ export default function PaymentsPage() {
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
               <TableHead className="font-semibold text-foreground">
+                Invoice Number
+              </TableHead>
+              <TableHead className="font-semibold text-foreground">
                 Payment Date
               </TableHead>
               <TableHead className="font-semibold text-foreground text-right">
@@ -102,6 +105,9 @@ export default function PaymentsPage() {
                   key={index}
                   className="hover:bg-muted/30 transition-colors"
                 >
+                  <TableCell className="font-semibold">
+                    {payment.invoice_number}
+                  </TableCell>
                   <TableCell className="font-medium">
                     {formatDate(payment.payment_date)}
                   </TableCell>
@@ -162,7 +168,7 @@ export default function PaymentsPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center">
+                <TableCell colSpan={5} className="h-24 text-center">
                   No payments found.
                 </TableCell>
               </TableRow>
