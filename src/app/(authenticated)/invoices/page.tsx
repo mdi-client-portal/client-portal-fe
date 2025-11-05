@@ -52,6 +52,14 @@ function isVoided(voidedAt: string | null): boolean {
   return voidedAt !== null;
 }
 
+function isOverdue(dueDate: string): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dueDate);
+  due.setHours(0, 0, 0, 0);
+  return due < today;
+}
+
 type SortColumn =
   | "invoice_number"
   | "issue_date"
@@ -273,7 +281,7 @@ export default function InvoicesPage() {
                 onClick={() => handleSort("voided_at")}
               >
                 <div className="flex items-center gap-2">
-                  Voided At
+                  Payment Status
                   {renderSortIcon("voided_at")}
                 </div>
               </TableHead>
@@ -295,7 +303,15 @@ export default function InvoicesPage() {
                   <TableCell className="font-medium">
                     {formatDate(invoice.issue_date)}
                   </TableCell>
-                  <TableCell>{formatDate(invoice.due_date)}</TableCell>
+                  <TableCell
+                    className={`${
+                      isOverdue(invoice.due_date)
+                        ? "bg-red-100 text-red-900 font-semibold"
+                        : ""
+                    }`}
+                  >
+                    {formatDate(invoice.due_date)}
+                  </TableCell>
                   <TableCell className="text-right font-medium">
                     {formatCurrency(invoice.total)}
                   </TableCell>

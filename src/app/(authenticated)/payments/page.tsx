@@ -35,7 +35,12 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
-type SortColumn = "invoice_number" | "payment_date" | "amount_paid" | "proof_of_transfer" | "voided_at";
+type SortColumn =
+  | "invoice_number"
+  | "payment_date"
+  | "amount_paid"
+  | "proof_of_transfer"
+  | "voided_at";
 type SortDirection = "asc" | "desc";
 
 export default function PaymentsPage() {
@@ -138,19 +143,28 @@ export default function PaymentsPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead className="font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors" onClick={() => handleSort("invoice_number")}>
+              <TableHead
+                className="font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
+                onClick={() => handleSort("invoice_number")}
+              >
                 <div className="flex items-center gap-2">
                   Invoice Number
                   {renderSortIcon("invoice_number")}
                 </div>
               </TableHead>
-              <TableHead className="font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors" onClick={() => handleSort("payment_date")}>
+              <TableHead
+                className="font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
+                onClick={() => handleSort("payment_date")}
+              >
                 <div className="flex items-center gap-2">
                   Payment Date
                   {renderSortIcon("payment_date")}
                 </div>
               </TableHead>
-              <TableHead className="font-semibold text-foreground text-right cursor-pointer hover:bg-muted/70 transition-colors" onClick={() => handleSort("amount_paid")}>
+              <TableHead
+                className="font-semibold text-foreground text-right cursor-pointer hover:bg-muted/70 transition-colors"
+                onClick={() => handleSort("amount_paid")}
+              >
                 <div className="flex items-center justify-end gap-2">
                   Payment Amount
                   {renderSortIcon("amount_paid")}
@@ -159,7 +173,10 @@ export default function PaymentsPage() {
               <TableHead className="font-semibold text-foreground text-right">
                 Proof of Transfer
               </TableHead>
-              <TableHead className="font-semibold text-foreground text-right cursor-pointer hover:bg-muted/70 transition-colors" onClick={() => handleSort("voided_at")}>
+              <TableHead
+                className="font-semibold text-foreground text-right cursor-pointer hover:bg-muted/70 transition-colors"
+                onClick={() => handleSort("voided_at")}
+              >
                 <div className="flex items-center justify-end gap-2">
                   Payment Status
                   {renderSortIcon("voided_at")}

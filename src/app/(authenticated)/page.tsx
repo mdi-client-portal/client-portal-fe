@@ -46,6 +46,14 @@ function getStatusBadgeVariant(status: string) {
   }
 }
 
+function isOverdue(dueDate: string): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dueDate);
+  due.setHours(0, 0, 0, 0);
+  return due < today;
+}
+
 export default function Home() {
   const { data: session } = useSession();
   const jwtToken = session?.user?.token || null;
@@ -76,7 +84,9 @@ export default function Home() {
 
   const overdueInvoices =
     invoicesData?.data?.filter(
-      (invoice) => invoice.payment_status.toLowerCase() === "overdue"
+      (invoice) =>
+        isOverdue(invoice.due_date) &&
+        invoice.payment_status.toLowerCase() !== "paid"
     ).length || 0;
 
   const recentInvoices = invoicesData?.data?.slice(0, 5) || [];
@@ -185,7 +195,15 @@ export default function Home() {
                     <TableCell className="font-medium">
                       {formatDate(invoice.issue_date)}
                     </TableCell>
-                    <TableCell>{formatDate(invoice.due_date)}</TableCell>
+                    <TableCell
+                      className={`${
+                        isOverdue(invoice.due_date)
+                          ? "bg-red-100 text-red-900 font-semibold"
+                          : ""
+                      }`}
+                    >
+                      {formatDate(invoice.due_date)}
+                    </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(invoice.total)}
                     </TableCell>
