@@ -14,6 +14,8 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { fetcherWithAuth } from "@/lib/fetcher";
+import { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import type { InvoiceResponse } from "@/response/invoiceResponse";
 
 function getStatusBadgeVariant(status: string) {
@@ -50,8 +52,20 @@ function isVoided(voidedAt: string | null): boolean {
   return voidedAt !== null;
 }
 
+type SortColumn =
+  | "invoice_number"
+  | "issue_date"
+  | "due_date"
+  | "total"
+  | "payment_status"
+  | "amount_paid"
+  | "voided_at";
+type SortDirection = "asc" | "desc";
+
 export default function InvoicesPage() {
   const { data: session } = useSession();
+  const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   const jwtToken = session?.user?.token || null;
   console.log("Using JWT Token from session:", jwtToken);
@@ -67,6 +81,56 @@ export default function InvoicesPage() {
   );
 
   console.log("Fetched invoices data:", data);
+
+  // Function to handle sorting
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  // Function to sort data
+  const getSortedData = () => {
+    if (!data?.data || sortColumn === null) {
+      return data?.data || [];
+    }
+
+    const sortedData = [...data.data].sort((a, b) => {
+      let aVal: any = a[sortColumn as keyof typeof a];
+      let bVal: any = b[sortColumn as keyof typeof b];
+
+      // Handle null/undefined values
+      if (aVal == null) aVal = "";
+      if (bVal == null) bVal = "";
+
+      // Compare values
+      if (typeof aVal === "string") {
+        aVal = aVal.toLowerCase();
+        bVal = bVal.toLowerCase();
+      }
+
+      if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return sortedData;
+  };
+
+  // Function to render sort icon
+  const renderSortIcon = (column: SortColumn) => {
+    if (sortColumn !== column) {
+      return <div className="w-4 h-4 opacity-30" />;
+    }
+    return sortDirection === "asc" ? (
+      <ChevronUp className="w-4 h-4" />
+    ) : (
+      <ChevronDown className="w-4 h-4" />
+    );
+  };
 
   // Function to generate PDF for specific invoice
   const handleGeneratePDF = async (invoiceId: string) => {
@@ -150,26 +214,68 @@ export default function InvoicesPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead className="font-semibold text-foreground">
-                Invoice Number
+              <TableHead
+                className="font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
+                onClick={() => handleSort("invoice_number")}
+              >
+                <div className="flex items-center gap-2">
+                  Invoice Number
+                  {renderSortIcon("invoice_number")}
+                </div>
               </TableHead>
-              <TableHead className="font-semibold text-foreground">
-                Issue Date
+              <TableHead
+                className="font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
+                onClick={() => handleSort("issue_date")}
+              >
+                <div className="flex items-center gap-2">
+                  Issue Date
+                  {renderSortIcon("issue_date")}
+                </div>
               </TableHead>
-              <TableHead className="font-semibold text-foreground">
-                Due Date
+              <TableHead
+                className="font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
+                onClick={() => handleSort("due_date")}
+              >
+                <div className="flex items-center gap-2">
+                  Due Date
+                  {renderSortIcon("due_date")}
+                </div>
               </TableHead>
-              <TableHead className="text-right font-semibold text-foreground">
-                Total
+              <TableHead
+                className="text-right font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
+                onClick={() => handleSort("total")}
+              >
+                <div className="flex items-center justify-end gap-2">
+                  Total
+                  {renderSortIcon("total")}
+                </div>
               </TableHead>
-              <TableHead className="font-semibold text-foreground">
-                Payment Status
+              <TableHead
+                className="font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
+                onClick={() => handleSort("payment_status")}
+              >
+                <div className="flex items-center gap-2">
+                  Payment Status
+                  {renderSortIcon("payment_status")}
+                </div>
               </TableHead>
-              <TableHead className="text-right font-semibold text-foreground">
-                Amount Paid
+              <TableHead
+                className="text-right font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
+                onClick={() => handleSort("amount_paid")}
+              >
+                <div className="flex items-center justify-end gap-2">
+                  Amount Paid
+                  {renderSortIcon("amount_paid")}
+                </div>
               </TableHead>
-              <TableHead className="font-semibold text-foreground">
-                Payment Status
+              <TableHead
+                className="font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
+                onClick={() => handleSort("voided_at")}
+              >
+                <div className="flex items-center gap-2">
+                  Voided At
+                  {renderSortIcon("voided_at")}
+                </div>
               </TableHead>
               <TableHead className="text-right font-semibold text-foreground">
                 Actions
@@ -177,8 +283,8 @@ export default function InvoicesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data?.data && data.data.length > 0 ? (
-              data.data.map((invoice, index) => (
+            {getSortedData().length > 0 ? (
+              getSortedData().map((invoice, index) => (
                 <TableRow
                   key={index}
                   className="transition-colors hover:bg-muted/30"
