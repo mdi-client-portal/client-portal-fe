@@ -7,10 +7,7 @@ import React from "react";
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("Starting PDF generation...");
-
     const body = await request.json();
-    console.log("Request body:", body);
 
     const { invoice_id, jwt_token } = body;
 
@@ -21,7 +18,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("Fetching invoice detail from API...");
     const apiResponse = await fetch(
       `${process.env.API_URL}/api/invoices/get/detail`,
       {
@@ -43,13 +39,9 @@ export async function POST(request: NextRequest) {
     }
 
     const invoiceData: InvoiceWithDetailResponse = await apiResponse.json();
-    console.log("Invoice data fetched:", invoiceData);
 
-    console.log("Rendering PDF template...");
     const element = React.createElement(PDFTemplate, { invoiceData }) as any;
     const pdfBuffer = await renderToBuffer(element);
-
-    console.log("PDF generated successfully, size:", pdfBuffer.length);
 
     return new NextResponse(pdfBuffer as BodyInit, {
       status: 200,
@@ -81,8 +73,6 @@ export async function POST(request: NextRequest) {
 // GET method untuk testing mudah
 export async function GET() {
   try {
-    console.log("Starting PDF generation via GET...");
-
     const dummyInvoiceData: InvoiceWithDetailResponse = {
       invoice: {
         invoice_id: "test-123",
@@ -124,12 +114,9 @@ export async function GET() {
       ],
     };
 
-    console.log("Rendering PDF template...");
     const pdfBuffer = await renderToBuffer(
       React.createElement(PDFTemplate, { invoiceData: dummyInvoiceData }) as any
     );
-
-    console.log("PDF generated successfully, size:", pdfBuffer.length);
 
     return new NextResponse(pdfBuffer as BodyInit, {
       status: 200,

@@ -15,11 +15,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: {},
       },
       authorize: async (credentials) => {
-        console.log(
-          "credentials authorize",
-          credentials.email,
-          credentials.password
-        );
+  
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Email or password missing");
         }
@@ -48,11 +44,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             process.env.NEXTAUTH_SECRET!
           );
 
-          console.log("=== GENERATED JWT TOKEN ===");
-          console.log("Token:", customJwtToken);
-          console.log("Payload:", jwt.decode(customJwtToken));
-          console.log("========================");
-
           const user = {
             id: data.client_id,
             name: data.client_name,
@@ -62,7 +53,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           return user;
         } catch (error) {
-          console.log("error wak", error);
           return null;
         }
       },
@@ -76,30 +66,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.name = user.name;
         token.email = user.email;
         token.customToken = user.token;
-
-        console.log("User object exists - first sign in");
-        console.log("Storing custom token in NextAuth token:", user.token);
       }
-
-      console.log("Current token state:", token);
-      console.log("==================");
 
       return token;
     },
 
     async session({ session, token }) {
-      console.log("=== SESSION CALLBACK ===");
-
       if (session.user) {
         session.user.id = token.id as string;
         session.user.name = token.name as string;
         session.user.email = token.email as string;
         session.user.token = token.customToken as string;
-
-        console.log("Session user token:", session.user.token);
       }
-
-      console.log("==================");
 
       return session;
     },

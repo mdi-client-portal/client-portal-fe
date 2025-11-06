@@ -79,9 +79,7 @@ export default function InvoicesPage() {
   const [voidedFilter, setVoidedFilter] = useState<string | null>(null);
 
   const jwtToken = session?.user?.token || null;
-  console.log("Using JWT Token from session:", jwtToken);
-  console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
-  const { data, error, isLoading, mutate } = useSWR<InvoiceResponse>(
+  const { data, error, isLoading } = useSWR<InvoiceResponse>(
     jwtToken ? `${process.env.NEXT_PUBLIC_API_URL}/api/invoices/get` : null,
     (url: string) =>
       fetcherWithAuth<InvoiceResponse>(url, jwtToken || undefined),
@@ -90,8 +88,6 @@ export default function InvoicesPage() {
       revalidateOnReconnect: false,
     }
   );
-
-  console.log("Fetched invoices data:", data);
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -169,8 +165,6 @@ export default function InvoicesPage() {
 
   const handleGeneratePDF = async (invoiceId: string) => {
     try {
-      console.log("Generating PDF for invoice:", invoiceId);
-
       const response = await fetch("/api/generate-pdf", {
         method: "POST",
         headers: {
@@ -196,8 +190,7 @@ export default function InvoicesPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-
-      console.log("PDF generated and downloaded successfully");
+      
     } catch (error) {
       console.error("Error generating PDF:", error);
       alert("Failed to generate PDF. Please try again.");
