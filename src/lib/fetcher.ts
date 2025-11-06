@@ -8,7 +8,11 @@ export const fetcher = async <T>(url: string): Promise<T> => {
 
 export const fetcherWithAuth = async <T>(
   url: string,
-  token?: string
+  token?: string,
+  options?: {
+    method?: string;
+    body?: any;
+  }
 ): Promise<T> => {
   const headers: HeadersInit = {
     "Content-Type": "application/json",
@@ -18,9 +22,16 @@ export const fetcherWithAuth = async <T>(
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const res = await fetch(url, {
+  const fetchOptions: RequestInit = {
     headers,
-  });
+    method: options?.method || "GET",
+  };
+
+  if (options?.body) {
+    fetchOptions.body = JSON.stringify(options.body);
+  }
+
+  const res = await fetch(url, fetchOptions);
 
   if (!res.ok) {
     throw new Error(`Failed to fetch data: ${res.status} ${res.statusText}`);

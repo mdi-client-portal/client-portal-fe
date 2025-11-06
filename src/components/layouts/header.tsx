@@ -1,8 +1,7 @@
 "use client";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { Bell } from "lucide-react";
+import { NotificationCenter } from "@/components/widgets/notificationCenter";
 
 export function Header() {
   return (
@@ -19,14 +18,7 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-xl hover:bg-muted"
-          aria-label="Notifications"
-        >
-          <Bell className="size-5" />
-        </Button>
+        <NotificationCenter />
       </div>
     </header>
   );
