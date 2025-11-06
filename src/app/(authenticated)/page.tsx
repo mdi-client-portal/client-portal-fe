@@ -68,7 +68,6 @@ export default function Home() {
     }
   );
 
-  // Calculate summary metrics
   const totalUnpaidAmount =
     invoicesData?.data?.reduce((total, invoice) => {
       if (invoice.payment_status.toLowerCase() !== "paid") {
@@ -115,7 +114,6 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <Card className="p-6">
           <h3 className="text-sm font-medium text-muted-foreground">
@@ -151,7 +149,6 @@ export default function Home() {
         </Card>
       </div>
 
-      {/* Recent Invoices */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-foreground">

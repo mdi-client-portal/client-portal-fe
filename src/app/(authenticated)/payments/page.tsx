@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -19,7 +18,6 @@ import { Input } from "@/components/ui/input";
 
 import type { PaymentResponse, Payment } from "@/response/paymentResponse";
 
-// Helper: format tanggal
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString("id-ID", {
     year: "numeric",
@@ -28,7 +26,6 @@ function formatDate(dateString: string) {
   });
 }
 
-// Helper: format currency IDR
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -52,7 +49,6 @@ export default function PaymentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
-  // Fetch data dari API payments/get
   const { data, error, isLoading } = useSWR<PaymentResponse>(
     jwtToken ? `${process.env.NEXT_PUBLIC_API_URL}/api/payments/get` : null,
     (url: string) =>
@@ -63,7 +59,6 @@ export default function PaymentsPage() {
     }
   );
 
-  // Function to handle sorting
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -73,13 +68,11 @@ export default function PaymentsPage() {
     }
   };
 
-  // Function to sort data
   const getSortedData = () => {
     if (!data?.data) {
       return [];
     }
 
-    // Apply filters first
     let filteredData = data.data.filter((payment) => {
       const matchesSearch = payment.invoice_number
         .toLowerCase()
@@ -90,7 +83,6 @@ export default function PaymentsPage() {
       return matchesSearch && matchesStatus;
     });
 
-    // Then sort
     if (sortColumn === null) {
       return filteredData;
     }
@@ -99,11 +91,9 @@ export default function PaymentsPage() {
       let aVal: any = a[sortColumn as keyof typeof a];
       let bVal: any = b[sortColumn as keyof typeof b];
 
-      // Handle null/undefined values
       if (aVal == null) aVal = "";
       if (bVal == null) bVal = "";
 
-      // Compare values
       if (typeof aVal === "string") {
         aVal = aVal.toLowerCase();
         bVal = bVal.toLowerCase();
@@ -117,7 +107,6 @@ export default function PaymentsPage() {
     return sortedData;
   };
 
-  // Function to render sort icon
   const renderSortIcon = (column: SortColumn) => {
     if (sortColumn !== column) {
       return <div className="w-4 h-4 opacity-30" />;
@@ -158,7 +147,6 @@ export default function PaymentsPage() {
         </p>
       </div>
 
-      {/* Filter Section */}
       <div className="mb-6 space-y-4 rounded-lg border bg-card p-4">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
@@ -309,14 +297,12 @@ export default function PaymentsPage() {
                         }
 
                         try {
-                          // Ambil data base64 dari string
                           const base64Data = proof.split(",")[1];
                           const contentType = proof
                             .split(",")[0]
                             .split(":")[1]
                             .split(";")[0];
 
-                          // Decode base64 ke Blob
                           const byteCharacters = atob(base64Data);
                           const byteNumbers = new Array(byteCharacters.length);
                           for (let i = 0; i < byteCharacters.length; i++) {
@@ -327,11 +313,9 @@ export default function PaymentsPage() {
                             type: contentType,
                           });
 
-                          // Buat object URL dan buka di tab baru
                           const blobUrl = URL.createObjectURL(blob);
                           window.open(blobUrl, "_blank");
 
-                          // Hapus URL setelah beberapa detik untuk hemat memori
                           setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
                         } catch (err) {
                           console.error("Error opening image:", err);

@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Link from "next/link";
+
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { fetcherWithAuth } from "@/lib/fetcher";
@@ -47,10 +47,6 @@ function formatDate(dateString: string) {
     month: "short",
     day: "numeric",
   });
-}
-
-function isVoided(voidedAt: string | null): boolean {
-  return voidedAt !== null;
 }
 
 function isOverdue(dueDate: string): boolean {
@@ -97,7 +93,6 @@ export default function InvoicesPage() {
 
   console.log("Fetched invoices data:", data);
 
-  // Function to handle sorting
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -107,35 +102,27 @@ export default function InvoicesPage() {
     }
   };
 
-  // Function to sort data
   const getSortedData = () => {
     if (!data?.data) {
       return [];
     }
 
-    // Apply filters first
     let filteredData = data.data.filter((invoice) => {
-      // Search filter
       const matchesSearch = invoice.invoice_number
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
 
-      // Payment status filter (paid, partial, unpaid)
       const matchesPaymentStatus =
         !paymentStatusFilter ||
-        (paymentStatusFilter === "unpaid"
-          ? invoice.payment_status.toLowerCase() !== "paid"
-          : invoice.payment_status.toLowerCase() ===
-            paymentStatusFilter.toLowerCase());
+        invoice.payment_status.toLowerCase() ===
+          paymentStatusFilter.toLowerCase();
 
-      // Overdue filter
       const matchesOverdue =
         !overdueFilter ||
         (overdueFilter === "overdue"
           ? isOverdue(invoice.due_date)
           : !isOverdue(invoice.due_date));
 
-      // Voided filter
       const matchesVoided =
         !voidedFilter ||
         (voidedFilter === "active" ? !invoice.voided_at : invoice.voided_at);
@@ -145,7 +132,6 @@ export default function InvoicesPage() {
       );
     });
 
-    // Then sort
     if (sortColumn === null) {
       return filteredData;
     }
@@ -154,11 +140,9 @@ export default function InvoicesPage() {
       let aVal: any = a[sortColumn as keyof typeof a];
       let bVal: any = b[sortColumn as keyof typeof b];
 
-      // Handle null/undefined values
       if (aVal == null) aVal = "";
       if (bVal == null) bVal = "";
 
-      // Compare values
       if (typeof aVal === "string") {
         aVal = aVal.toLowerCase();
         bVal = bVal.toLowerCase();
@@ -172,7 +156,6 @@ export default function InvoicesPage() {
     return sortedData;
   };
 
-  // Function to render sort icon
   const renderSortIcon = (column: SortColumn) => {
     if (sortColumn !== column) {
       return <div className="w-4 h-4 opacity-30" />;
@@ -184,12 +167,10 @@ export default function InvoicesPage() {
     );
   };
 
-  // Function to generate PDF for specific invoice
   const handleGeneratePDF = async (invoiceId: string) => {
     try {
       console.log("Generating PDF for invoice:", invoiceId);
 
-      // Call API to generate PDF with invoice data
       const response = await fetch("/api/generate-pdf", {
         method: "POST",
         headers: {
@@ -205,7 +186,6 @@ export default function InvoicesPage() {
         throw new Error("Failed to generate PDF");
       }
 
-      // Get the PDF blob and download it
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -262,10 +242,8 @@ export default function InvoicesPage() {
         </p>
       </div>
 
-      {/* Filter Section */}
       <div className="mb-6 space-y-4 rounded-lg border bg-card p-4">
         <div className="grid gap-4 md:grid-cols-3">
-          {/* Search */}
           <div>
             <label className="text-sm font-medium text-foreground">
               Search Invoice Number
@@ -279,7 +257,6 @@ export default function InvoicesPage() {
             />
           </div>
 
-          {/* Payment Status Filter */}
           <div>
             <label className="text-sm font-medium text-foreground">
               Payment Status
@@ -311,7 +288,6 @@ export default function InvoicesPage() {
             </div>
           </div>
 
-          {/* Overdue Filter */}
           <div>
             <label className="text-sm font-medium text-foreground">
               Overdue Status
@@ -345,13 +321,12 @@ export default function InvoicesPage() {
                     : "bg-muted hover:bg-muted/80"
                 }`}
               >
-                Belum Telat
+                Before Due
               </button>
             </div>
           </div>
         </div>
 
-        {/* Voided Status Filter */}
         <div>
           <label className="text-sm font-medium text-foreground">
             Voided Status
@@ -390,7 +365,6 @@ export default function InvoicesPage() {
           </div>
         </div>
 
-        {/* Active Filters */}
         {(searchTerm ||
           paymentStatusFilter ||
           overdueFilter ||

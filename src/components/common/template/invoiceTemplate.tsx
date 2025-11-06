@@ -9,7 +9,6 @@ import {
   Font,
 } from "@react-pdf/renderer";
 import type { InvoiceWithDetailResponse } from "@/response/invoiceDetailResponse";
-import { LogOut } from "lucide-react";
 
 const styles = StyleSheet.create({
   page: {
@@ -191,7 +190,6 @@ const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
-// Helper function untuk format date
 const formatDate = (dateString: string): string => {
   return new Date(dateString).toLocaleDateString("id-ID", {
     year: "numeric",
@@ -224,10 +222,8 @@ export default function PDFTemplate({ invoiceData }: PDFTemplateProps) {
           </View>
         </View>
 
-        {/* Invoice Title */}
         <Text style={styles.title}>INVOICE</Text>
 
-        {/* Invoice Information */}
         <View style={styles.invoiceInfo}>
           <View style={styles.invoiceInfoSection}>
             <Text style={styles.sectionTitle}>Invoice Details</Text>
@@ -272,9 +268,7 @@ export default function PDFTemplate({ invoiceData }: PDFTemplateProps) {
           </View>
         </View>
 
-        {/* Invoice Details Table */}
         <View style={styles.table}>
-          {/* Table Header */}
           <View style={styles.tableHeader}>
             <View style={styles.tableCol1}>
               <Text style={styles.tableHeaderText}>Description</Text>
@@ -316,7 +310,6 @@ export default function PDFTemplate({ invoiceData }: PDFTemplateProps) {
           ))}
         </View>
 
-        {/* Totals Section */}
         <View style={styles.totalsSection}>
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Subtotal:</Text>
