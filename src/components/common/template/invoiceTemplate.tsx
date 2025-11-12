@@ -200,6 +200,9 @@ const formatDate = (dateString: string): string => {
 
 export default function PDFTemplate({ invoiceData }: PDFTemplateProps) {
   const { invoice, invoice_details } = invoiceData;
+  console.log("Rendering PDF for invoice:", invoiceData);
+  console.log("Rendering PDF for invoice:", invoice);
+  console.log("Rendering PDF for invoice details:", invoice_details);
 
   return (
     <Document>
