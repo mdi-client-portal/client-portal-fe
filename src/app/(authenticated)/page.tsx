@@ -94,15 +94,18 @@ export default function Home() {
         invoice.payment_status.toLowerCase() !== "paid"
     ).length || 0;
 
-  const first5Invoices = invoicesData?.data?.slice(0, 5) || [];
+  const sortedInvoices = [...(invoicesData?.data || [])].sort((a, b) => {
+    return new Date(b.issue_date).getTime() - new Date(a.issue_date).getTime();
+  });
 
-  const allOverdueInvoices =
-    invoicesData?.data?.filter(
-      (invoice) =>
-        isOverdue(invoice.due_date) &&
-        invoice.payment_status.toLowerCase() !== "paid" &&
-        !invoice.voided_at
-    ) || [];
+  const first5Invoices = sortedInvoices.slice(0, 5);
+
+  const allOverdueInvoices = sortedInvoices.filter(
+    (invoice) =>
+      isOverdue(invoice.due_date) &&
+      invoice.payment_status.toLowerCase() !== "paid" &&
+      !invoice.voided_at
+  );
 
   const first5Ids = new Set(first5Invoices.map((inv) => inv.invoice_id));
   const additionalOverdue = allOverdueInvoices.filter(
