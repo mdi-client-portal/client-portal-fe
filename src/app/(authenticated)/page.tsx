@@ -70,7 +70,10 @@ export default function Home() {
 
   const totalUnpaidAmount =
     invoicesData?.data?.reduce((total, invoice) => {
-      if (invoice.payment_status.toLowerCase() !== "paid") {
+      if (
+        invoice.payment_status.toLowerCase() !== "paid" &&
+        !invoice.voided_at
+      ) {
         return total + (invoice.total - invoice.amount_paid);
       }
       return total;
@@ -78,7 +81,10 @@ export default function Home() {
 
   const totalPaidAmount =
     invoicesData?.data?.reduce((total, invoice) => {
-      return total + invoice.amount_paid;
+      if (!invoice.voided_at) {
+        return total + invoice.amount_paid;
+      }
+      return total;
     }, 0) || 0;
 
   const overdueInvoices =
@@ -180,6 +186,9 @@ export default function Home() {
                 <TableHead className="text-right font-semibold text-foreground">
                   Amount Paid
                 </TableHead>
+                <TableHead className="font-semibold text-foreground">
+                  Invoice Status
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -223,11 +232,20 @@ export default function Home() {
                     <TableCell className="text-right">
                       {formatCurrency(invoice.amount_paid)}
                     </TableCell>
+                    <TableCell>
+                      <span
+                        className={`font-semibold ${
+                          invoice.voided_at ? "text-red-600" : "text-green-600"
+                        }`}
+                      >
+                        {invoice.voided_at ? "Void" : "Active"}
+                      </span>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
+                  <TableCell colSpan={6} className="h-24 text-center">
                     No recent invoices found.
                   </TableCell>
                 </TableRow>
