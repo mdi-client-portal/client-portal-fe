@@ -94,7 +94,22 @@ export default function Home() {
         invoice.payment_status.toLowerCase() !== "paid"
     ).length || 0;
 
-  const recentInvoices = invoicesData?.data?.slice(0, 5) || [];
+  const first5Invoices = invoicesData?.data?.slice(0, 5) || [];
+
+  const allOverdueInvoices =
+    invoicesData?.data?.filter(
+      (invoice) =>
+        isOverdue(invoice.due_date) &&
+        invoice.payment_status.toLowerCase() !== "paid" &&
+        !invoice.voided_at
+    ) || [];
+
+  const first5Ids = new Set(first5Invoices.map((inv) => inv.invoice_id));
+  const additionalOverdue = allOverdueInvoices.filter(
+    (invoice) => !first5Ids.has(invoice.invoice_id)
+  );
+
+  const recentInvoices = [...first5Invoices, ...additionalOverdue];
 
   if (isLoading) {
     return (
