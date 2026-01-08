@@ -15,12 +15,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: {},
       },
       authorize: async (credentials) => {
-        console.log("=== AUTHORIZE CALLED ===");
-        console.log("Credentials:", { email: credentials?.email });
-        console.log("API_URL:", process.env.API_URL);
+        // console.log("=== AUTHORIZE CALLED ===");
+        // console.log("Credentials:", { email: credentials?.email });
+        // console.log("API_URL:", process.env.API_URL);
 
         if (!credentials?.email || !credentials?.password) {
-          console.log("Missing email or password");
+          // console.log("Missing email or password");
           throw new Error("Email or password missing");
         }
 
@@ -33,17 +33,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
           );
 
-          console.log("API Response Status:", response.status);
-          console.log("API Response Data:", response.data);
+          // console.log("API Response Status:", response.status);
+          // console.log("API Response Data:", response.data);
 
           let data = response.data.data;
 
           if (!data) {
-            console.log("No data in response");
+            // console.log("No data in response");
             return null;
           }
 
-          console.log("Extracted data:", data);
+          // console.log("Extracted data:", data);
 
           const customJwtToken = jwt.sign(
             {
@@ -61,14 +61,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             token: customJwtToken,
           };
 
-          console.log("User created successfully:", user.email);
+          // console.log("User created successfully:", user.email);
           return user;
         } catch (error) {
-          console.error("=== AUTHORIZE ERROR ===");
-          console.error("Error details:", error);
+          // console.error("=== AUTHORIZE ERROR ===");
+          // console.error("Error details:", error);
           if (axios.isAxiosError(error)) {
-            console.error("Axios error response:", error.response?.data);
-            console.error("Axios error status:", error.response?.status);
+            // console.error("Axios error response:", error.response?.data);
+            // console.error("Axios error status:", error.response?.status);
           }
           return null;
         }
