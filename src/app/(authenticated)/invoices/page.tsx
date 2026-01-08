@@ -201,7 +201,7 @@ export default function InvoicesPage() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            All Invoices
+            Invoices
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Loading invoices...
@@ -215,7 +215,7 @@ export default function InvoicesPage() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            All Invoices
+            Invoices
           </h1>
           <p className="mt-2 text-sm text-destructive">
             Error loading invoices: {error.message}
@@ -227,7 +227,7 @@ export default function InvoicesPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          All Invoices
+          Invoices
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           View and manage all your invoices
@@ -493,7 +493,8 @@ export default function InvoicesPage() {
                   </TableCell>
                   <TableCell
                     className={`${
-                      isOverdue(invoice.due_date)
+                      isOverdue(invoice.due_date) &&
+                      invoice.payment_status.toLowerCase() !== "paid"
                         ? "bg-red-100 text-red-900 font-semibold"
                         : ""
                     }`}

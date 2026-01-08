@@ -221,7 +221,8 @@ export default function Home() {
                     </TableCell>
                     <TableCell
                       className={`${
-                        isOverdue(invoice.due_date)
+                        isOverdue(invoice.due_date) &&
+                        invoice.payment_status.toLowerCase() !== "paid"
                           ? "bg-red-100 text-red-900 font-semibold"
                           : ""
                       }`}
